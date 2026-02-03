@@ -17,7 +17,7 @@ export async function searchTabs(query: string){
 
     return tabs
     .map(tab =>{
-        const tabTokens= tokenize(tab.title + " " + tab.url);
+        const tabTokens= tokenize(`${tab.title} ${tab.url} ${tab.contentText || ""}`);
 
         let score=0;
 

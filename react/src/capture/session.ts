@@ -1,5 +1,7 @@
 /// <reference types="chrome" />
 import { db } from "../storage/db";
+import { extractReadableText } from "./content";
+
 
 export async function captureSession() {
     const tabs = await chrome.tabs.query({ currentWindow: true });
@@ -11,14 +13,22 @@ export async function captureSession() {
         tabCount: tabs.length
     })
 
-    await db.tabs.bulkAdd(
-        tabs.map(t => ({
+    for(const tab of tabs){
+        let contentText="";
+
+        if(tab.id && tab.url?.startsWith("http")){
+            contentText = await extractReadableText(tab.id);
+        }
+
+        await db.tabs.add({
             tabId: crypto.randomUUID(),
             sessionId,
-            url: t.url || "",
-            title: t.title || "",
-            favicon: t.favIconUrl,
-            timestamp: Date.now()
-        }))
-    )
+            url: tab.url || "",
+            title: tab.title || "",
+            favicon: tab.favIconUrl,
+            timestamp: Date.now(),
+            contentText
+        });
+    
+    }
 }
