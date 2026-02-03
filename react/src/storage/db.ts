@@ -13,6 +13,8 @@ export interface Tab{
     title: string;
     favicon?:string;
     timestamp:number;
+    contentText?: string;
+    contentHash?: string;
 }
 
 class TabArchieveDB extends Dexie {
@@ -25,6 +27,12 @@ class TabArchieveDB extends Dexie {
             sessions: "sessionId, createdAt",
             tabs: "tabId, sessionId, url"
         });
+
+        this.version(2).stores({
+            sessions: "sessionId, createdAt",
+            tabs: "tabId, sessionId, url, contestHash"
+        })
+
     }
 }
 
