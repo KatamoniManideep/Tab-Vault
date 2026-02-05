@@ -10,5 +10,5 @@ export async function extractReadableText(tabId: number){
     return (result ?? "")
         .replace(/\s+/g," ")
         .trim()
-        .slice(0,20000);
+        .slice(0,15000);
 }

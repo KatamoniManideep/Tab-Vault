@@ -17,12 +17,14 @@ export async function searchTabs(query: string){
 
     return tabs
     .map(tab =>{
-        const tabTokens= tokenize(`${tab.title} ${tab.url} ${tab.contentText || ""}`);
+        const tabTokens= tokenize(`${tab.title} ${tab.url}`);
+        const contentTokens =tokenize(tab.contentText || "");
 
         let score=0;
 
         for(const token of queryTokens){
-            if(tabTokens.includes(token)) score++;
+            if(tabTokens.includes(token)) score+=3;
+            else if( contentTokens.includes(token)) score++;
         }
 
         return {tab,score};
