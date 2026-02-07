@@ -1,6 +1,8 @@
 /// <reference types="chrome" />
 import { db } from "../storage/db";
 import { extractReadableText } from "./content";
+import { hashText } from "../utils/hash";
+import { cleanUpStorage } from "../storage/cleanup";
 
 
 export async function captureSession() {
@@ -15,11 +17,23 @@ export async function captureSession() {
 
     for(const tab of tabs){
         let contentText="";
+        let contentHash="";
 
         if(tab.id && tab.url?.startsWith("http")){
             contentText = await extractReadableText(tab.id);
+            contentHash=hashText(contentText);
+
+            const exists= await db.tabs
+            .where("contentHash")
+            .equals(contentHash)
+            .first();
+
+            if(exists){
+                contentText="";
+            }
         }
 
+        
         await db.tabs.add({
             tabId: crypto.randomUUID(),
             sessionId,
@@ -27,8 +41,9 @@ export async function captureSession() {
             title: tab.title || "",
             favicon: tab.favIconUrl,
             timestamp: Date.now(),
-            contentText
+            contentText,
+            contentHash
         });
-    
+        await cleanUpStorage();
     }
 }
