@@ -3,17 +3,29 @@ import {db} from './db';
 export async function searchBySession(query: string){
     const tabs = await db.tabs.toArray();
     const q = query.toLowerCase();
+    const sessions = await db.sessions.toArray();
 
-    const matches = tabs.filter(t =>
-    (t.title + " " + t.url).toLowerCase().includes(q)
-    );
+    const sessionMap: Record<
+    string,{meta: any,tabs : typeof tabs}
+    >={};
 
-    const grouped: Record<string , typeof matches> ={};
+    sessions.forEach(s =>{
+        sessionMap[s.sessionId]={
+            meta: s,
+            tabs:[]
+        };
+    });
 
-    for(const tab of matches){
-        if(!grouped[tab.sessionId]) grouped[tab.sessionId]=[];
-        grouped[tab.sessionId].push(tab);
+    for(const t of tabs){
+        if((t.title+" "+t.url).toLowerCase().includes(q)){
+            if(sessionMap[t.sessionId]){
+                sessionMap[t.sessionId].tabs.push(t);
+            }
+        }
     }
+        
 
-    return grouped;
+    return Object.fromEntries(
+        Object.entries(sessionMap).filter(([_, V]) =>V.tabs.length>0)
+    );
 }
